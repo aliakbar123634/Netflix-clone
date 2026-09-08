@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 
 from pathlib import Path
 from decouple import config
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,6 +38,15 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
+    "apps.accounts.apps.AccountsConfig",
+    "apps.profiles.apps.ProfilesConfig",
+    "apps.catalog.apps.CatalogConfig",
+    "apps.history.apps.HistoryConfig",
+    "apps.watchlist.apps.WatchlistConfig",
+    "apps.discovery.apps.DiscoveryConfig",
+    "apps.recommendations.apps.RecommendationsConfig",
+    "apps.subscriptions.apps.SubscriptionsConfig",
+    "apps.streaming.apps.StreamingConfig"
 ]
 
 MIDDLEWARE = [
@@ -102,6 +112,16 @@ REST_FRAMEWORK = {
     ),
 }
 
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
 # Password validation
 # https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
 
@@ -132,6 +152,7 @@ USE_I18N = True
 
 USE_TZ = True
 
+AUTH_USER_MODEL = "accounts.User"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
@@ -155,3 +176,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
 ]
+
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
