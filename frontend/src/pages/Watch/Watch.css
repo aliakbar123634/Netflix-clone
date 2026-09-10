@@ -1,0 +1,1265 @@
+/* ============================================================
+   WATCH PAGE
+============================================================ */
+
+.watch-page {
+  width: 100%;
+  min-height: 100vh;
+
+  background: #000;
+  color: #fff;
+}
+
+
+/* ============================================================
+   PLAYER
+============================================================ */
+
+.watch-player {
+  position: relative;
+
+  width: 100%;
+  height: 100vh;
+  min-height: 500px;
+
+  overflow: hidden;
+
+  background: #000;
+}
+
+
+.watch-page-fullscreen
+.watch-player {
+  width: 100vw;
+  height: 100vh;
+}
+
+
+.watch-video {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: contain;
+
+  background: #000;
+}
+
+
+/* ============================================================
+   TOP BAR
+============================================================ */
+
+.watch-topbar {
+  position: absolute;
+
+  top: 0;
+  left: 0;
+  right: 0;
+
+  z-index: 10;
+
+  display: flex;
+  align-items: center;
+
+  gap: 18px;
+
+  padding:
+    25px 4% 70px;
+
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(0,0,0,.95),
+      rgba(0,0,0,0)
+    );
+
+  opacity: 0;
+
+  pointer-events: none;
+
+  transition:
+    opacity .25s ease;
+}
+
+
+.watch-topbar.watch-controls-visible {
+  opacity: 1;
+
+  pointer-events: auto;
+}
+
+
+/* ============================================================
+   BACK BUTTON
+============================================================ */
+
+.watch-back-button {
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  background:
+    rgba(0,0,0,.65);
+
+  color: #fff;
+
+  font-size: 22px;
+
+  cursor: pointer;
+
+  transition:
+    background .2s ease,
+    transform .2s ease;
+}
+
+
+.watch-back-button:hover {
+  background:
+    rgba(255,255,255,.15);
+
+  transform:
+    scale(1.05);
+}
+
+
+/* ============================================================
+   TITLE
+============================================================ */
+
+.watch-title-area {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 4px;
+
+  min-width: 0;
+}
+
+
+.watch-title-area span {
+  color:
+    rgba(255,255,255,.55);
+
+  font-size: 10px;
+
+  font-weight: 800;
+
+  letter-spacing: 2px;
+}
+
+
+.watch-title-area strong {
+  overflow: hidden;
+
+  max-width: 700px;
+
+  font-size: 20px;
+
+  font-weight: 700;
+
+  white-space: nowrap;
+
+  text-overflow: ellipsis;
+}
+
+
+.watch-title-area small {
+  overflow: hidden;
+
+  max-width: 700px;
+
+  color:
+    rgba(255,255,255,.65);
+
+  font-size: 12px;
+
+  white-space: nowrap;
+
+  text-overflow: ellipsis;
+}
+
+
+/* ============================================================
+   CENTER PLAY
+============================================================ */
+
+.watch-center-play {
+  position: absolute;
+
+  top: 50%;
+  left: 50%;
+
+  z-index: 8;
+
+  width: 72px;
+  height: 72px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transform:
+    translate(-50%, -50%);
+
+  border-radius: 50%;
+
+  background:
+    rgba(255,255,255,.92);
+
+  color: #000;
+
+  font-size: 27px;
+
+  padding-left: 5px;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 8px 40px
+    rgba(0,0,0,.55);
+
+  transition:
+    transform .2s ease,
+    background .2s ease;
+}
+
+
+.watch-center-play:hover {
+  transform:
+    translate(-50%, -50%)
+    scale(1.08);
+
+  background: #fff;
+}
+
+
+/* ============================================================
+   CONTROLS
+============================================================ */
+
+.watch-controls {
+  position: absolute;
+
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  z-index: 10;
+
+  padding:
+    60px 4% 25px;
+
+  background:
+    linear-gradient(
+      to top,
+      rgba(0,0,0,.96),
+      rgba(0,0,0,0)
+    );
+
+  opacity: 0;
+
+  pointer-events: none;
+
+  transition:
+    opacity .25s ease;
+}
+
+
+.watch-controls.watch-controls-visible {
+  opacity: 1;
+
+  pointer-events: auto;
+}
+
+
+/* ============================================================
+   PROGRESS
+============================================================ */
+
+.watch-progress-wrapper {
+  width: 100%;
+
+  margin-bottom: 12px;
+}
+
+
+.watch-progress {
+  width: 100%;
+  height: 4px;
+
+  display: block;
+
+  appearance: none;
+
+  border-radius: 10px;
+
+  outline: none;
+
+  cursor: pointer;
+
+  background:
+    linear-gradient(
+      to right,
+      #e50914 0%,
+      #e50914 var(--progress),
+      rgba(255,255,255,.28)
+        var(--progress),
+      rgba(255,255,255,.28) 100%
+    );
+}
+
+
+.watch-progress::-webkit-slider-thumb {
+  width: 14px;
+  height: 14px;
+
+  appearance: none;
+
+  border: 0;
+
+  border-radius: 50%;
+
+  background: #e50914;
+
+  cursor: pointer;
+}
+
+
+.watch-progress::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+
+  border: 0;
+
+  border-radius: 50%;
+
+  background: #e50914;
+
+  cursor: pointer;
+}
+
+
+/* ============================================================
+   CONTROL ROW
+============================================================ */
+
+.watch-control-row {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 20px;
+}
+
+
+.watch-control-left,
+.watch-control-right {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  min-width: 0;
+}
+
+
+/* ============================================================
+   CONTROL BUTTON
+============================================================ */
+
+.watch-control-button {
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  background: transparent;
+
+  color: #fff;
+
+  border-radius: 50%;
+
+  cursor: pointer;
+
+  font-size: 17px;
+
+  transition:
+    background .2s ease,
+    transform .2s ease;
+}
+
+
+.watch-control-button:hover {
+  background:
+    rgba(255,255,255,.13);
+
+  transform:
+    scale(1.05);
+}
+
+
+/* ============================================================
+   SKIP BUTTON
+============================================================ */
+
+.watch-skip-button {
+  position: relative;
+
+  font-size: 21px;
+}
+
+
+.watch-skip-button small {
+  position: absolute;
+
+  font-size: 7px;
+
+  font-weight: 800;
+
+  bottom: 9px;
+}
+
+
+/* ============================================================
+   VOLUME
+============================================================ */
+
+.watch-volume {
+  width: 85px;
+  height: 4px;
+
+  appearance: none;
+
+  outline: none;
+
+  cursor: pointer;
+
+  border-radius: 10px;
+
+  background:
+    rgba(255,255,255,.35);
+}
+
+
+.watch-volume::-webkit-slider-thumb {
+  width: 12px;
+  height: 12px;
+
+  appearance: none;
+
+  border: 0;
+
+  border-radius: 50%;
+
+  background: #fff;
+
+  cursor: pointer;
+}
+
+
+.watch-volume::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+
+  border: 0;
+
+  border-radius: 50%;
+
+  background: #fff;
+
+  cursor: pointer;
+}
+
+
+/* ============================================================
+   TIME
+============================================================ */
+
+.watch-time {
+  margin-left: 6px;
+
+  color:
+    rgba(255,255,255,.85);
+
+  font-size: 12px;
+
+  white-space: nowrap;
+}
+
+
+/* ============================================================
+   QUALITY
+============================================================ */
+
+.watch-quality {
+  padding:
+    5px 8px;
+
+  border:
+    1px solid
+    rgba(255,255,255,.25);
+
+  border-radius: 3px;
+
+  color: #fff;
+
+  font-size: 11px;
+
+  font-weight: 700;
+
+  text-transform: uppercase;
+}
+
+
+/* ============================================================
+   SAVING
+============================================================ */
+
+.watch-saving {
+  color:
+    rgba(255,255,255,.55);
+
+  font-size: 11px;
+}
+
+
+.watch-save-error {
+  color: #ff8080;
+
+  font-size: 11px;
+}
+
+
+/* ============================================================
+   END SCREEN
+============================================================ */
+
+.watch-ended {
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 7;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: 30px;
+
+  background:
+    rgba(0,0,0,.66);
+}
+
+
+.watch-ended-card {
+  width: min(600px, 100%);
+
+  padding: 40px;
+
+  text-align: center;
+
+  border:
+    1px solid
+    rgba(255,255,255,.12);
+
+  border-radius: 8px;
+
+  background:
+    rgba(20,20,20,.94);
+
+  box-shadow:
+    0 25px 100px
+    rgba(0,0,0,.7);
+}
+
+
+.watch-ended-card > span {
+  color: #e50914;
+
+  font-size: 10px;
+
+  font-weight: 900;
+
+  letter-spacing: 3px;
+}
+
+
+.watch-ended-card h2 {
+  margin:
+    12px 0;
+
+  font-size:
+    clamp(25px, 4vw, 42px);
+}
+
+
+.watch-ended-card p {
+  margin-bottom: 25px;
+
+  color:
+    rgba(255,255,255,.58);
+
+  line-height: 1.5;
+}
+
+
+.watch-ended-actions {
+  display: flex;
+
+  justify-content: center;
+
+  flex-wrap: wrap;
+
+  gap: 10px;
+}
+
+
+/* ============================================================
+   BUTTONS
+============================================================ */
+
+.watch-primary-button,
+.watch-secondary-button {
+  min-height: 44px;
+
+  padding:
+    0 20px;
+
+  border-radius: 4px;
+
+  cursor: pointer;
+
+  font-size: 14px;
+
+  font-weight: 700;
+
+  transition:
+    transform .2s ease,
+    opacity .2s ease;
+}
+
+
+.watch-primary-button {
+  background: #fff;
+
+  color: #000;
+}
+
+
+.watch-secondary-button {
+  background: #333;
+
+  color: #fff;
+}
+
+
+.watch-primary-button:hover,
+.watch-secondary-button:hover {
+  transform:
+    translateY(-1px);
+
+  opacity: .88;
+}
+
+
+.watch-primary-button:disabled {
+  opacity: .5;
+
+  cursor: not-allowed;
+}
+
+
+/* ============================================================
+   INFORMATION
+============================================================ */
+
+.watch-information {
+  width: min(1400px, 100%);
+
+  margin: 0 auto;
+
+  padding:
+    55px 6vw 90px;
+}
+
+
+.watch-information-main {
+  display: flex;
+
+  align-items: flex-start;
+
+  justify-content: space-between;
+
+  gap: 50px;
+}
+
+
+.watch-information-type {
+  color: #e50914;
+
+  font-size: 10px;
+
+  font-weight: 900;
+
+  letter-spacing: 3px;
+}
+
+
+.watch-information h1 {
+  margin:
+    10px 0 12px;
+
+  font-size:
+    clamp(30px, 5vw, 55px);
+
+  line-height: 1.05;
+}
+
+
+.watch-information-meta {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 14px;
+
+  margin-bottom: 18px;
+
+  color:
+    rgba(255,255,255,.58);
+
+  font-size: 13px;
+}
+
+
+.watch-information-main p {
+  max-width: 800px;
+
+  margin: 0;
+
+  color:
+    rgba(255,255,255,.62);
+
+  font-size: 15px;
+
+  line-height: 1.7;
+}
+
+
+/* ============================================================
+   PLAN
+============================================================ */
+
+.watch-plan {
+  min-width: 150px;
+
+  padding:
+    18px;
+
+  border:
+    1px solid
+    rgba(255,255,255,.1);
+
+  border-radius: 6px;
+
+  background:
+    rgba(255,255,255,.035);
+}
+
+
+.watch-plan span {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color:
+    rgba(255,255,255,.4);
+
+  font-size: 9px;
+
+  font-weight: 800;
+
+  letter-spacing: 2px;
+}
+
+
+.watch-plan strong {
+  display: block;
+
+  margin-bottom: 4px;
+
+  font-size: 15px;
+}
+
+
+.watch-plan small {
+  color:
+    rgba(255,255,255,.5);
+
+  font-size: 11px;
+}
+
+
+/* ============================================================
+   NEXT EPISODE
+============================================================ */
+
+.watch-next {
+  margin-top: 45px;
+
+  padding:
+    24px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 20px;
+
+  border-top:
+    1px solid
+    rgba(255,255,255,.08);
+
+  border-bottom:
+    1px solid
+    rgba(255,255,255,.08);
+
+  background:
+    rgba(255,255,255,.025);
+}
+
+
+.watch-next > div > span {
+  color:
+    rgba(255,255,255,.4);
+
+  font-size: 9px;
+
+  font-weight: 800;
+
+  letter-spacing: 2px;
+}
+
+
+.watch-next h2 {
+  margin-top: 7px;
+
+  font-size: 19px;
+}
+
+
+/* ============================================================
+   LOADING
+============================================================ */
+
+.watch-loading {
+  width: 100%;
+  min-height: 100vh;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 18px;
+
+  color:
+    rgba(255,255,255,.55);
+}
+
+
+.watch-loader {
+  width: 42px;
+  height: 42px;
+
+  border:
+    4px solid
+    #333;
+
+  border-top-color:
+    #e50914;
+
+  border-radius: 50%;
+
+  animation:
+    watch-spin
+    .8s linear infinite;
+}
+
+
+@keyframes watch-spin {
+
+  to {
+    transform:
+      rotate(360deg);
+  }
+
+}
+
+
+/* ============================================================
+   ERROR
+============================================================ */
+
+.watch-error {
+  width: min(600px, 90%);
+
+  min-height: 100vh;
+
+  margin: 0 auto;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  text-align: center;
+}
+
+
+.watch-error-icon {
+  width: 50px;
+  height: 50px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  margin-bottom: 18px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(229,9,20,.15);
+
+  border:
+    1px solid
+    rgba(229,9,20,.4);
+
+  color: #e50914;
+
+  font-size: 24px;
+
+  font-weight: 900;
+}
+
+
+.watch-error h1 {
+  margin-bottom: 12px;
+
+  font-size: 30px;
+}
+
+
+.watch-error p {
+  max-width: 520px;
+
+  color:
+    rgba(255,255,255,.55);
+
+  line-height: 1.6;
+}
+
+
+.watch-error-actions {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  justify-content: center;
+
+  gap: 10px;
+
+  margin-top: 25px;
+}
+
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+
+@media (max-width: 900px) {
+
+  .watch-player {
+    height: 70vh;
+
+    min-height: 400px;
+  }
+
+
+  .watch-control-row {
+    gap: 8px;
+  }
+
+
+  .watch-control-left,
+  .watch-control-right {
+    gap: 4px;
+  }
+
+
+  .watch-volume {
+    width: 60px;
+  }
+
+
+  .watch-information-main {
+    flex-direction: column;
+
+    gap: 25px;
+  }
+
+
+  .watch-plan {
+    width: 100%;
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  .watch-player {
+    height: 55vh;
+
+    min-height: 300px;
+  }
+
+
+  .watch-topbar {
+    padding:
+      15px 18px 55px;
+  }
+
+
+  .watch-title-area strong {
+    max-width: 220px;
+
+    font-size: 15px;
+  }
+
+
+  .watch-title-area small {
+    max-width: 220px;
+  }
+
+
+  .watch-center-play {
+    width: 58px;
+    height: 58px;
+
+    font-size: 21px;
+  }
+
+
+  .watch-controls {
+    padding:
+      45px 15px 12px;
+  }
+
+
+  .watch-control-row {
+    align-items: center;
+  }
+
+
+  .watch-control-left {
+    gap: 2px;
+
+    min-width: 0;
+  }
+
+
+  .watch-control-right {
+    gap: 2px;
+  }
+
+
+  .watch-control-button {
+    width: 32px;
+    height: 32px;
+
+    font-size: 14px;
+  }
+
+
+  .watch-volume {
+    display: none;
+  }
+
+
+  .watch-time {
+    margin-left: 3px;
+
+    font-size: 10px;
+  }
+
+
+  .watch-quality {
+    display: none;
+  }
+
+
+  .watch-saving,
+  .watch-save-error {
+    display: none;
+  }
+
+
+  .watch-information {
+    padding:
+      35px 18px 60px;
+  }
+
+
+  .watch-information h1 {
+    font-size: 32px;
+  }
+
+
+  .watch-next {
+    flex-direction: column;
+
+    align-items: flex-start;
+  }
+
+
+  .watch-ended-card {
+    padding: 28px 20px;
+  }
+
+}
+
+
+/* =========================================================
+   F14 — WATCH RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+  .watch-page {
+    width: 100%;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  .watch-player {
+    width: 100%;
+    min-height: 100vh;
+  }
+
+  .watch-video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .watch-topbar {
+    padding:
+      12px
+      14px;
+  }
+
+  .watch-back-button {
+    width: 36px;
+    height: 36px;
+  }
+
+  .watch-title-area {
+    min-width: 0;
+    max-width: calc(
+      100vw - 90px
+    );
+  }
+
+  .watch-title-area strong {
+    display: block;
+
+    max-width: 100%;
+
+    overflow: hidden;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+
+    font-size: 13px;
+  }
+
+  .watch-title-area span {
+    font-size: 9px;
+  }
+
+  .watch-title-area small {
+    font-size: 10px;
+  }
+
+  .watch-controls {
+    padding:
+      10px
+      12px;
+  }
+
+}
+
+
+@media (max-width: 480px) {
+
+  .watch-topbar {
+    padding:
+      10px
+      10px;
+  }
+
+  .watch-back-button {
+    width: 32px;
+    height: 32px;
+
+    font-size: 16px;
+  }
+
+  .watch-title-area {
+    max-width: calc(
+      100vw - 70px
+    );
+  }
+
+  .watch-title-area strong {
+    font-size: 11px;
+  }
+
+  .watch-title-area span {
+    font-size: 8px;
+  }
+
+}

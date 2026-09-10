@@ -107,3 +107,8 @@ class WatchHistory(models.Model):
             f"{self.profile.name} - "
             f"{self.content}"
         )    
+
+
+
+#     python manage.py makemigrations
+#     python manage.py migrate

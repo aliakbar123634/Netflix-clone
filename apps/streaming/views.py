@@ -1,6 +1,7 @@
 from django.db import transaction
 from django.db.models import F
 from django.utils import timezone
+from django.contrib.contenttypes.models import ContentType
 
 from rest_framework.permissions import (
     IsAuthenticated,
@@ -13,7 +14,9 @@ from apps.catalog.models import (
     Episode,
 )
 
-from apps.profiles.models import Profile
+from apps.profiles.models import (
+    Profile,
+)
 
 from apps.subscriptions.models import (
     Subscription,
@@ -29,23 +32,32 @@ from apps.streaming.serializers import (
 )
 
 
-class StreamingBaseView(APIView):
+# ============================================================
+# STREAMING BASE VIEW
+# ============================================================
+
+class StreamingBaseView(
+    APIView
+):
 
     permission_classes = [
         IsAuthenticated
     ]
 
-    # ============================================================
+
+    # ========================================================
     # GET PROFILE
-    # ============================================================
+    # ========================================================
 
     def get_profile(
         self,
         request
     ):
 
-        profile_id = request.query_params.get(
-            "profile_id"
+        profile_id = (
+            request.query_params.get(
+                "profile_id"
+            )
         )
 
         if not profile_id:
@@ -54,10 +66,12 @@ class StreamingBaseView(APIView):
 
         try:
 
-            profile = Profile.objects.get(
-                id=profile_id,
-                user=request.user,
-                is_active=True,
+            profile = (
+                Profile.objects.get(
+                    id=profile_id,
+                    user=request.user,
+                    is_active=True,
+                )
             )
 
             return profile
@@ -66,9 +80,10 @@ class StreamingBaseView(APIView):
 
             return None
 
-    # ============================================================
-    # CHECK SUBSCRIPTION
-    # ============================================================
+
+    # ========================================================
+    # ACTIVE SUBSCRIPTION
+    # ========================================================
 
     def get_active_subscription(
         self,
@@ -94,9 +109,10 @@ class StreamingBaseView(APIView):
 
         return subscription
 
-    # ============================================================
+
+    # ========================================================
     # MATURITY FILTER
-    # ============================================================
+    # ========================================================
 
     def is_content_allowed(
         self,
@@ -115,6 +131,7 @@ class StreamingBaseView(APIView):
             "16+": 16,
 
             "18+": 18,
+
         }
 
         if profile.is_kids:
@@ -123,89 +140,347 @@ class StreamingBaseView(APIView):
 
         else:
 
-            max_age = maturity_levels.get(
-                profile.maturity_level,
+            max_age = (
+                maturity_levels.get(
+                    profile.maturity_level,
+                    18
+                )
+            )
+
+        content_age = (
+            maturity_levels.get(
+                content.maturity_rating,
                 18
             )
-
-        content_age = maturity_levels.get(
-            content.maturity_rating,
-            18
         )
 
-        return content_age <= max_age
+        return (
+            content_age <= max_age
+        )
 
-    # ============================================================
+
+    # ========================================================
     # GET WATCH PROGRESS
-    # ============================================================
+    # ========================================================
+    
+
+    # ========================================================
+# GET WATCH PROGRESS
+# ========================================================
 
     def get_progress(
-        self,
-        profile,
-        content
-    ):
+    self,
+    profile,
+    content
+):
+
+    # ----------------------------------------------------
+    # GET DJANGO CONTENT TYPE
+    # ----------------------------------------------------
+
+        content_type = ContentType.objects.get_for_model(
+            content
+    )
+
+    # ----------------------------------------------------
+    # FIND EXISTING PROGRESS
+    # ----------------------------------------------------
 
         progress = (
-            WatchProgress.objects
-            .filter(
-                profile=profile,
-                content=content
-            )
-            .first()
+        WatchProgress.objects
+        .filter(
+            profile=profile,
+            content_type=content_type,
+            object_id=content.id,
         )
+        .first()
+    )
+
+    # ----------------------------------------------------
+    # NO PREVIOUS PROGRESS
+    # ----------------------------------------------------
 
         if not progress:
 
+            duration_seconds = int(
+            (content.duration or 0) * 60
+        )
+
             return {
+            "position": 0,
 
-                "position": 0,
+            "duration": duration_seconds,
 
-                "duration": (
-                    content.duration
-                    or 0
-                ),
+            "completed": False,
 
-                "completed": False,
+            "progress_percentage": 0,
+        }
 
-                "progress_percentage": 0,
-            }
+    # ----------------------------------------------------
+    # EXISTING PROGRESS
+    # ----------------------------------------------------
 
-        duration = progress.duration
+        duration = int(
+        progress.duration or 0
+    )
+
+        position = int(
+        progress.position or 0
+    )
+
+    # ----------------------------------------------------
+    # CALCULATE PERCENTAGE
+    # ----------------------------------------------------
 
         if duration > 0:
 
             percentage = (
-                progress.position
-                /
-                duration
-            ) * 100
+            position /
+            duration
+        ) * 100
 
         else:
 
             percentage = 0
 
+    # ----------------------------------------------------
+    # RETURN PROGRESS
+    # ----------------------------------------------------
+
         return {
 
-            "position": progress.position,
+        "position": position,
 
-            "duration": duration,
+        "duration": duration,
 
-            "completed": progress.completed,
+        "completed": progress.completed,
 
-            "progress_percentage": round(
+        "progress_percentage": round(
+            min(
                 percentage,
-                2
+                100
             ),
+            2
+        ),
+
+    }
+
+
+    # def get_progress(
+    #     self,
+    #     profile,
+    #     content
+    # ):
+
+    #     progress = (
+    #         WatchProgress.objects
+    #         .filter(
+    #             profile=profile,
+    #             content=content,
+    #         )
+    #         .first()
+    #     )
+
+    #     # ----------------------------------------------------
+    #     # No previous progress
+    #     # ----------------------------------------------------
+
+    #     if not progress:
+
+    #         duration_seconds = int(
+    #             (content.duration or 0) * 60
+    #         )
+
+    #         return {
+
+    #             "position": 0,
+
+    #             "duration": (
+    #                 duration_seconds
+    #             ),
+
+    #             "completed": False,
+
+    #             "progress_percentage": 0,
+
+    #         }
+
+
+    #     # ----------------------------------------------------
+    #     # Existing progress
+    #     # ----------------------------------------------------
+
+    #     duration = int(
+    #         progress.duration or 0
+    #     )
+
+    #     position = int(
+    #         progress.position or 0
+    #     )
+
+    #     if duration > 0:
+
+    #         percentage = (
+    #             position /
+    #             duration
+    #         ) * 100
+
+    #     else:
+
+    #         percentage = 0
+
+
+    #     return {
+
+    #         "position": position,
+
+    #         "duration": duration,
+
+    #         "completed": (
+    #             progress.completed
+    #         ),
+
+    #         "progress_percentage": round(
+    #             min(
+    #                 percentage,
+    #                 100
+    #             ),
+    #             2
+    #         ),
+
+    #     }
+
+
+    # ========================================================
+    # NEXT EPISODE
+    # ========================================================
+
+    def get_next_episode(
+        self,
+        episode
+    ):
+
+        current_season = (
+            episode.season
+        )
+
+        current_show = (
+            current_season.show
+        )
+
+
+        # ----------------------------------------------------
+        # Next episode in SAME season
+        # ----------------------------------------------------
+
+        next_episode = (
+            Episode.objects
+            .filter(
+                season=current_season,
+                episode_number__gt=(
+                    episode.episode_number
+                ),
+                is_published=True,
+            )
+            .order_by(
+                "episode_number"
+            )
+            .first()
+        )
+
+
+        if next_episode:
+
+            return {
+
+                "id": next_episode.id,
+
+                "title": next_episode.title,
+
+                "episode_number": (
+                    next_episode.episode_number
+                ),
+
+                "season_id": (
+                    current_season.id
+                ),
+
+                "season_number": (
+                    current_season.season_number
+                ),
+
+            }
+
+
+        # ----------------------------------------------------
+        # First episode of NEXT season
+        # ----------------------------------------------------
+
+        next_season = (
+            current_show.seasons
+            .filter(
+                season_number__gt=(
+                    current_season.season_number
+                )
+            )
+            .order_by(
+                "season_number"
+            )
+            .first()
+        )
+
+
+        if not next_season:
+
+            return None
+
+
+        next_episode = (
+            next_season.episodes
+            .filter(
+                is_published=True
+            )
+            .order_by(
+                "episode_number"
+            )
+            .first()
+        )
+
+
+        if not next_episode:
+
+            return None
+
+
+        return {
+
+            "id": next_episode.id,
+
+            "title": next_episode.title,
+
+            "episode_number": (
+                next_episode.episode_number
+            ),
+
+            "season_id": (
+                next_season.id
+            ),
+
+            "season_number": (
+                next_season.season_number
+            ),
+
         }
 
 
-# ================================================================
+# ============================================================
 # MOVIE STREAMING
-# ================================================================
+# ============================================================
 
 class MovieStreamView(
     StreamingBaseView
 ):
+
 
     def get(
         self,
@@ -213,9 +488,9 @@ class MovieStreamView(
         movie_id
     ):
 
-        # --------------------------------------------------------
-        # Profile
-        # --------------------------------------------------------
+        # ====================================================
+        # PROFILE
+        # ====================================================
 
         profile = self.get_profile(
             request
@@ -224,17 +499,21 @@ class MovieStreamView(
         if not profile:
 
             return Response(
+
                 {
                     "detail": (
-                        "Valid profile_id is required."
+                        "Valid profile_id "
+                        "is required."
                     )
                 },
+
                 status=400
             )
 
-        # --------------------------------------------------------
-        # Subscription
-        # --------------------------------------------------------
+
+        # ====================================================
+        # SUBSCRIPTION
+        # ====================================================
 
         subscription = (
             self.get_active_subscription(
@@ -245,40 +524,57 @@ class MovieStreamView(
         if not subscription:
 
             return Response(
+
                 {
                     "detail": (
                         "An active subscription "
-                        "is required to watch content."
+                        "is required to watch "
+                        "content."
                     ),
 
                     "subscription_required": True,
+
                 },
+
                 status=403
             )
 
-        # --------------------------------------------------------
-        # Movie
-        # --------------------------------------------------------
+
+        # ====================================================
+        # MOVIE
+        # ====================================================
 
         try:
 
-            movie = Movie.objects.get(
-                id=movie_id,
-                is_published=True
+            movie = (
+                Movie.objects
+                .prefetch_related(
+                    "genres",
+                    "cast",
+                    "directors",
+                )
+                .get(
+                    id=movie_id,
+                    is_published=True,
+                )
             )
 
         except Movie.DoesNotExist:
 
             return Response(
+
                 {
-                    "detail": "Movie not found."
+                    "detail":
+                        "Movie not found."
                 },
+
                 status=404
             )
 
-        # --------------------------------------------------------
-        # Maturity
-        # --------------------------------------------------------
+
+        # ====================================================
+        # MATURITY
+        # ====================================================
 
         if not self.is_content_allowed(
             movie,
@@ -286,109 +582,148 @@ class MovieStreamView(
         ):
 
             return Response(
+
                 {
                     "detail": (
                         "This content is not "
-                        "available for this profile."
+                        "available for this "
+                        "profile."
                     )
                 },
+
                 status=403
             )
 
-        # --------------------------------------------------------
-        # Video URL
-        # --------------------------------------------------------
+
+        # ====================================================
+        # VIDEO URL
+        # ====================================================
 
         if not movie.video_url:
 
             return Response(
+
                 {
                     "detail": (
                         "Video is not available "
                         "for this movie."
                     )
                 },
+
                 status=404
             )
 
-        # --------------------------------------------------------
-        # Progress
-        # --------------------------------------------------------
+
+        # ====================================================
+        # WATCH PROGRESS
+        # ====================================================
 
         progress = self.get_progress(
             profile,
             movie
         )
 
-        # --------------------------------------------------------
-        # Increment view count
-        # --------------------------------------------------------
+
+        # ====================================================
+        # VIEW COUNT
+        # ====================================================
 
         with transaction.atomic():
 
             Movie.objects.filter(
                 id=movie.id
             ).update(
-                view_count=F("view_count") + 1
+
+                view_count=(
+                    F("view_count") + 1
+                )
+
             )
 
-        # --------------------------------------------------------
-        # Serialize
-        # --------------------------------------------------------
 
-        serializer = MoviePlaybackSerializer(
-            movie
+        # ====================================================
+        # SERIALIZER
+        # ====================================================
+
+        serializer = (
+            MoviePlaybackSerializer(
+                movie,
+                context={
+                    "request": request
+                }
+            )
         )
 
-        # --------------------------------------------------------
-        # Response
-        # --------------------------------------------------------
 
-        return Response({
+        # ====================================================
+        # RESPONSE
+        # ====================================================
 
-            "content_type": "movie",
+        return Response(
 
-            "content": serializer.data,
+            {
 
-            "playback": {
+                "content_type": "movie",
 
-                "video_url": movie.video_url,
-
-                "quality": (
-                    subscription.plan.video_quality
+                "content": (
+                    serializer.data
                 ),
 
-            },
+                "playback": {
 
-            "subscription": {
+                    "video_url": (
+                        movie.video_url
+                    ),
 
-                "plan": subscription.plan.name,
+                    "quality": (
+                        subscription
+                        .plan
+                        .video_quality
+                    ),
 
-                "video_quality": (
-                    subscription.plan.video_quality
-                ),
+                },
 
-                "max_devices": (
-                    subscription.plan.max_devices
-                ),
+                "subscription": {
 
-                "expires_at": (
-                    subscription.end_date
-                ),
-            },
+                    "plan": (
+                        subscription
+                        .plan
+                        .name
+                    ),
 
-            "watch_progress": progress,
+                    "video_quality": (
+                        subscription
+                        .plan
+                        .video_quality
+                    ),
 
-        })
+                    "max_devices": (
+                        subscription
+                        .plan
+                        .max_devices
+                    ),
+
+                    "expires_at": (
+                        subscription
+                        .end_date
+                    ),
+
+                },
+
+                "watch_progress": progress,
+
+            }
+        )
 
 
-# ================================================================
+# ============================================================
 # EPISODE STREAMING
-# ================================================================
+# ============================================================
 
 class EpisodeStreamView(
     StreamingBaseView
 ):
+
 
     def get(
         self,
@@ -396,9 +731,9 @@ class EpisodeStreamView(
         episode_id
     ):
 
-        # --------------------------------------------------------
-        # Profile
-        # --------------------------------------------------------
+        # ====================================================
+        # PROFILE
+        # ====================================================
 
         profile = self.get_profile(
             request
@@ -407,17 +742,21 @@ class EpisodeStreamView(
         if not profile:
 
             return Response(
+
                 {
                     "detail": (
-                        "Valid profile_id is required."
+                        "Valid profile_id "
+                        "is required."
                     )
                 },
+
                 status=400
             )
 
-        # --------------------------------------------------------
-        # Subscription
-        # --------------------------------------------------------
+
+        # ====================================================
+        # SUBSCRIPTION
+        # ====================================================
 
         subscription = (
             self.get_active_subscription(
@@ -428,20 +767,25 @@ class EpisodeStreamView(
         if not subscription:
 
             return Response(
+
                 {
                     "detail": (
                         "An active subscription "
-                        "is required to watch content."
+                        "is required to watch "
+                        "content."
                     ),
 
                     "subscription_required": True,
+
                 },
+
                 status=403
             )
 
-        # --------------------------------------------------------
-        # Episode
-        # --------------------------------------------------------
+
+        # ====================================================
+        # EPISODE
+        # ====================================================
 
         try:
 
@@ -449,7 +793,7 @@ class EpisodeStreamView(
                 Episode.objects
                 .select_related(
                     "season",
-                    "season__show"
+                    "season__show",
                 )
                 .get(
                     id=episode_id
@@ -459,34 +803,47 @@ class EpisodeStreamView(
         except Episode.DoesNotExist:
 
             return Response(
+
                 {
-                    "detail": (
+                    "detail":
                         "Episode not found."
-                    )
                 },
+
                 status=404
             )
 
-        # --------------------------------------------------------
-        # Published check
-        # --------------------------------------------------------
+
+        # ====================================================
+        # PUBLISHED
+        # ====================================================
 
         if not episode.is_published:
 
             return Response(
+
                 {
                     "detail": (
-                        "This episode is not available."
+                        "This episode is "
+                        "not available."
                     )
                 },
+
                 status=404
             )
 
-        # --------------------------------------------------------
-        # Maturity
-        # --------------------------------------------------------
 
-        show = episode.season.show
+        # ====================================================
+        # SHOW
+        # ====================================================
+
+        show = (
+            episode.season.show
+        )
+
+
+        # ====================================================
+        # MATURITY
+        # ====================================================
 
         if not self.is_content_allowed(
             show,
@@ -494,105 +851,174 @@ class EpisodeStreamView(
         ):
 
             return Response(
+
                 {
                     "detail": (
                         "This content is not "
-                        "available for this profile."
+                        "available for this "
+                        "profile."
                     )
                 },
+
                 status=403
             )
 
-        # --------------------------------------------------------
-        # Video URL
-        # --------------------------------------------------------
+
+        # ====================================================
+        # VIDEO URL
+        # ====================================================
 
         if not episode.video_url:
 
             return Response(
+
                 {
                     "detail": (
                         "Video is not available "
                         "for this episode."
                     )
                 },
+
                 status=404
             )
 
-        # --------------------------------------------------------
-        # Progress
-        # --------------------------------------------------------
+
+        # ====================================================
+        # WATCH PROGRESS
+        # ====================================================
 
         progress = self.get_progress(
             profile,
             episode
         )
 
-        # --------------------------------------------------------
-        # Serialize
-        # --------------------------------------------------------
 
-        serializer = EpisodePlaybackSerializer(
-            episode
+        # ====================================================
+        # NEXT EPISODE
+        # ====================================================
+
+        next_episode = (
+            self.get_next_episode(
+                episode
+            )
         )
 
-        # --------------------------------------------------------
-        # Response
-        # --------------------------------------------------------
 
-        return Response({
+        # ====================================================
+        # VIEW COUNT
+        # ====================================================
 
-            "content_type": "episode",
+        with transaction.atomic():
 
-            "content": serializer.data,
+            Episode.objects.filter(
+                id=episode.id
+            ).update(
 
-            "show": {
+                view_count=(
+                    F("view_count") + 1
+                )
 
-                "id": show.id,
+            )
 
-                "title": show.title,
 
-            },
+        # ====================================================
+        # SERIALIZER
+        # ====================================================
 
-            "season": {
+        serializer = (
+            EpisodePlaybackSerializer(
+                episode,
+                context={
+                    "request": request
+                }
+            )
+        )
 
-                "id": episode.season.id,
 
-                "season_number": (
-                    episode.season.season_number
+        # ====================================================
+        # RESPONSE
+        # ====================================================
+
+        return Response(
+
+            {
+
+                "content_type": "episode",
+
+                "content": (
+                    serializer.data
                 ),
 
-            },
+                "show": {
 
-            "playback": {
+                    "id": show.id,
 
-                "video_url": (
-                    episode.video_url
+                    "title": show.title,
+
+                },
+
+                "season": {
+
+                    "id": (
+                        episode
+                        .season
+                        .id
+                    ),
+
+                    "season_number": (
+                        episode
+                        .season
+                        .season_number
+                    ),
+
+                },
+
+                "playback": {
+
+                    "video_url": (
+                        episode.video_url
+                    ),
+
+                    "quality": (
+                        subscription
+                        .plan
+                        .video_quality
+                    ),
+
+                },
+
+                "subscription": {
+
+                    "plan": (
+                        subscription
+                        .plan
+                        .name
+                    ),
+
+                    "video_quality": (
+                        subscription
+                        .plan
+                        .video_quality
+                    ),
+
+                    "max_devices": (
+                        subscription
+                        .plan
+                        .max_devices
+                    ),
+
+                    "expires_at": (
+                        subscription
+                        .end_date
+                    ),
+
+                },
+
+                "watch_progress": progress,
+
+                "next_episode": (
+                    next_episode
                 ),
 
-                "quality": (
-                    subscription.plan.video_quality
-                ),
-
-            },
-
-            "subscription": {
-
-                "plan": subscription.plan.name,
-
-                "video_quality": (
-                    subscription.plan.video_quality
-                ),
-
-                "max_devices": (
-                    subscription.plan.max_devices
-                ),
-
-                "expires_at": (
-                    subscription.end_date
-                ),
-            },
-
-            "watch_progress": progress,
-
-        })
+            }
+        )

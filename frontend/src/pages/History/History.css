@@ -1,0 +1,354 @@
+/* ============================================================
+   HISTORY PAGE
+============================================================ */
+
+.history-page {
+  min-height: 100vh;
+
+  padding:
+    120px 5% 80px;
+
+  background: #090909;
+
+  color: #ffffff;
+}
+
+
+/* ============================================================
+   HEADER
+============================================================ */
+
+.history-header {
+  margin-bottom: 55px;
+}
+
+.history-header > span {
+  display: block;
+
+  color: #e50914;
+
+  font-size: 13px;
+
+  font-weight: 900;
+
+  letter-spacing: 5px;
+}
+
+.history-header h1 {
+  margin: 10px 0;
+
+  font-size: clamp(
+    38px,
+    5vw,
+    56px
+  );
+
+  line-height: 1;
+}
+
+.history-header p {
+  max-width: 600px;
+
+  margin: 15px 0 0;
+
+  color: #888;
+
+  line-height: 1.7;
+}
+
+
+/* ============================================================
+   SECTION
+============================================================ */
+
+.history-section {
+  margin-bottom: 70px;
+}
+
+.history-section-header {
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  margin-bottom: 20px;
+}
+
+.history-section-header h2 {
+  margin: 0;
+
+  font-size: 24px;
+}
+
+.history-section-header span {
+  min-width: 28px;
+
+  height: 24px;
+
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: 0 8px;
+
+  border-radius: 12px;
+
+  background: #222;
+
+  color: #aaa;
+
+  font-size: 12px;
+}
+
+
+/* ============================================================
+   GRID
+============================================================ */
+
+.history-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fill,
+      minmax(180px, 1fr)
+    );
+
+  gap: 32px 15px;
+}
+
+.history-grid .content-card {
+  width: 100%;
+}
+
+.history-grid
+.content-card-image-wrapper {
+  width: 100%;
+
+  height: 360px;
+}
+
+
+/* ============================================================
+   PROGRESS
+============================================================ */
+
+.history-page
+.content-card-progress {
+  position: absolute;
+
+  left: 0;
+
+  right: 0;
+
+  bottom: 0;
+
+  z-index: 8;
+
+  height: 4px;
+
+  background: rgba(
+    255,
+    255,
+    255,
+    0.25
+  );
+}
+
+.history-page
+.content-card-progress-fill {
+  height: 100%;
+
+  background: #e50914;
+}
+
+
+/* ============================================================
+   REMOVE BUTTON
+============================================================ */
+
+.history-page
+.content-card-remove {
+  margin-top: 9px;
+
+  padding: 6px 0;
+
+  border: 0;
+
+  background: transparent;
+
+  color: #888;
+
+  cursor: pointer;
+
+  font-size: 11px;
+
+  transition:
+    color 0.2s ease;
+}
+
+.history-page
+.content-card-remove:hover {
+  color: #ffffff;
+}
+
+.history-page
+.content-card-remove:disabled {
+  opacity: 0.5;
+
+  cursor: not-allowed;
+}
+
+
+/* ============================================================
+   EMPTY STATE
+============================================================ */
+
+.history-empty {
+  min-height: 260px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: 40px;
+
+  border:
+    1px solid #222;
+
+  border-radius: 8px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #111,
+      #0d0d0d
+    );
+
+  text-align: center;
+}
+
+.history-empty-icon {
+  width: 54px;
+
+  height: 54px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  margin-bottom: 15px;
+
+  border:
+    1px solid #333;
+
+  border-radius: 50%;
+
+  background: #181818;
+
+  color: #e50914;
+
+  font-size: 20px;
+}
+
+.history-empty h3 {
+  margin: 0 0 8px;
+
+  color: #ffffff;
+
+  font-size: 20px;
+}
+
+.history-empty p {
+  max-width: 450px;
+
+  margin: 0;
+
+  color: #777;
+
+  line-height: 1.6;
+}
+
+
+/* ============================================================
+   TABLET
+============================================================ */
+
+@media (max-width: 900px) {
+
+  .history-page {
+    padding:
+      110px 4% 70px;
+  }
+
+  .history-grid {
+    grid-template-columns:
+      repeat(
+        auto-fill,
+        minmax(150px, 1fr)
+      );
+  }
+
+  .history-grid
+  .content-card-image-wrapper {
+    height: 260px;
+  }
+
+}
+
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media (max-width: 600px) {
+
+  .history-page {
+    padding:
+      100px 18px 60px;
+  }
+
+  .history-header {
+    margin-bottom: 40px;
+  }
+
+  .history-header h1 {
+    font-size: 38px;
+  }
+
+  .history-section {
+    margin-bottom: 50px;
+  }
+
+  .history-section-header h2 {
+    font-size: 21px;
+  }
+
+  .history-grid {
+    grid-template-columns:
+      repeat(2, 1fr);
+
+    gap: 25px 10px;
+  }
+
+  .history-grid
+  .content-card-image-wrapper {
+    height: 230px;
+  }
+
+  .history-empty {
+    min-height: 220px;
+
+    padding: 25px 15px;
+  }
+
+}

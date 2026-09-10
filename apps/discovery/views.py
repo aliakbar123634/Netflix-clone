@@ -1,3 +1,4 @@
+
 from django.db.models import Q
 
 from rest_framework.permissions import AllowAny
@@ -144,46 +145,251 @@ class SearchView(
             ""
         ).strip()
 
-        if not query:
 
-            return Response({
-                "query": "",
-                "movies": [],
-                "shows": [],
-                "total": 0,
-            })
+        # =====================================================
+        # PROFILE
+        # =====================================================
 
+        # An empty query is allowed when filters are supplied.
+        # The frontend uses this for filter-only discovery.
         profile = self.get_profile(
             request
         )
 
+
+        # =====================================================
+        # FILTER VALUES
+        # =====================================================
+
+        content_type = (
+            request.query_params.get(
+                "type",
+                "all"
+            ).lower()
+        )
+
+
+        genre = (
+            request.query_params.get(
+                "genre",
+                ""
+            ).strip()
+        )
+
+
+        year = (
+            request.query_params.get(
+                "year",
+                ""
+            ).strip()
+        )
+
+
+        sort = (
+            request.query_params.get(
+                "sort",
+                "relevance"
+            ).lower()
+        )
+
+
+        # =====================================================
+        # BASE QUERYSETS
+        # =====================================================
+
         movies = self.get_movie_queryset(
             profile
-        ).filter(
-            Q(title__icontains=query)
-            |
-            Q(description__icontains=query)
-            |
-            Q(genres__name__icontains=query)
-            |
-            Q(cast__name__icontains=query)
-            |
-            Q(directors__name__icontains=query)
-        ).distinct()
+        )
+
 
         shows = self.get_show_queryset(
             profile
-        ).filter(
-            Q(title__icontains=query)
-            |
-            Q(description__icontains=query)
-            |
-            Q(genres__name__icontains=query)
-            |
-            Q(cast__name__icontains=query)
-            |
-            Q(directors__name__icontains=query)
-        ).distinct()
+        )
+
+
+        # =====================================================
+        # TEXT SEARCH
+        # =====================================================
+
+        # Text search is optional.
+        # If query is empty, keep the base querysets so that
+        # genre/year/type/sort filters can still return results.
+        search_filter = None
+
+        if query:
+
+            search_filter = (
+                Q(title__icontains=query)
+                |
+                Q(description__icontains=query)
+                |
+                Q(genres__name__icontains=query)
+                |
+                Q(cast__name__icontains=query)
+                |
+                Q(directors__name__icontains=query)
+            )
+
+
+        # =====================================================
+        # MOVIE SEARCH
+        # =====================================================
+
+        if content_type in [
+            "all",
+            "movie",
+            "movies",
+        ]:
+
+            if search_filter is not None:
+
+                movies = (
+                    movies
+                    .filter(search_filter)
+                    .distinct()
+                )
+
+        else:
+
+            movies = Movie.objects.none()
+
+
+        # =====================================================
+        # SHOW SEARCH
+        # =====================================================
+
+        if content_type in [
+            "all",
+            "show",
+            "shows",
+            "tv",
+            "tvshow",
+            "tvshows",
+        ]:
+
+            if search_filter is not None:
+
+                shows = (
+                    shows
+                    .filter(search_filter)
+                    .distinct()
+                )
+
+        else:
+
+            shows = TVShow.objects.none()
+
+
+        # =====================================================
+        # GENRE FILTER
+        # =====================================================
+
+        if genre:
+
+            if genre.isdigit():
+
+                movies = movies.filter(
+                    genres__id=int(genre)
+                )
+
+                shows = shows.filter(
+                    genres__id=int(genre)
+                )
+
+            else:
+
+                movies = movies.filter(
+                    genres__slug=genre
+                )
+
+                shows = shows.filter(
+                    genres__slug=genre
+                )
+
+
+        # =====================================================
+        # YEAR FILTER
+        # =====================================================
+
+        if year.isdigit():
+
+            movies = movies.filter(
+                release_year=int(year)
+            )
+
+            shows = shows.filter(
+                release_year=int(year)
+            )
+
+
+        # =====================================================
+        # SORTING
+        # =====================================================
+
+        if sort == "popular":
+
+            movies = movies.order_by(
+                "-view_count",
+                "-created_at"
+            )
+
+            shows = shows.order_by(
+                "-view_count",
+                "-created_at"
+            )
+
+
+        elif sort == "newest":
+
+            movies = movies.order_by(
+                "-release_year",
+                "-created_at"
+            )
+
+            shows = shows.order_by(
+                "-release_year",
+                "-created_at"
+            )
+
+
+        elif sort == "oldest":
+
+            movies = movies.order_by(
+                "release_year",
+                "created_at"
+            )
+
+            shows = shows.order_by(
+                "release_year",
+                "created_at"
+            )
+
+
+        else:
+
+            # Relevance fallback:
+            # title matches remain naturally prominent
+            movies = movies.order_by(
+                "title"
+            )
+
+            shows = shows.order_by(
+                "title"
+            )
+
+
+        # =====================================================
+        # LIMIT RESULTS
+        # =====================================================
+
+        movies = movies[:50]
+
+        shows = shows[:50]
+
+
+        # =====================================================
+        # SERIALIZE
+        # =====================================================
 
         movie_data = MovieSerializer(
             movies,
@@ -193,6 +399,7 @@ class SearchView(
             }
         ).data
 
+
         show_data = TVShowSerializer(
             shows,
             many=True,
@@ -201,9 +408,21 @@ class SearchView(
             }
         ).data
 
+
+        # =====================================================
+        # RESPONSE
+        # =====================================================
+
         return Response({
 
             "query": query,
+
+            "filters": {
+                "type": content_type,
+                "genre": genre,
+                "year": year,
+                "sort": sort,
+            },
 
             "movies": movie_data,
 
@@ -214,6 +433,7 @@ class SearchView(
                 +
                 len(show_data)
             ),
+
         })
 
 
